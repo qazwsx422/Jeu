@@ -10,8 +10,8 @@ ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
 -- 主框架
 MainFrame.Parent = ScreenGui
-MainFrame.Size = UDim2.new(0, 300, 0, 250)
-MainFrame.Position = UDim2.new(0.5, -150, 0.5, -125)
+MainFrame.Size = UDim2.new(0, 300, 0, 300)
+MainFrame.Position = UDim2.new(0.5, -150, 0.5, -150)
 MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 MainFrame.BorderSizePixel = 0
 
@@ -87,58 +87,42 @@ CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
--- 墨水游戏按钮
-local inkGameBtn = Instance.new("TextButton")
-inkGameBtn.Parent = Content
-inkGameBtn.Size = UDim2.new(0, 200, 0, 40)
-inkGameBtn.Position = UDim2.new(0.5, -100, 0.1, 0)
-inkGameBtn.BackgroundColor3 = Color3.fromRGB(120, 80, 160)
-inkGameBtn.Text = "墨水游戏"
-inkGameBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-inkGameBtn.TextSize = 14
+-- 创建按钮的辅助函数
+local function CreateButton(text, yPosition, color, callback)
+    local button = Instance.new("TextButton")
+    button.Parent = Content
+    button.Size = UDim2.new(0, 200, 0, 35)
+    button.Position = UDim2.new(0.5, -100, yPosition, 0)
+    button.BackgroundColor3 = color
+    button.BorderSizePixel = 0
+    button.Text = text
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.TextSize = 14
+    button.MouseButton1Click:Connect(callback)
+    return button
+end
 
-inkGameBtn.MouseButton1Click:Connect(function()
+-- 墨水游戏按钮
+CreateButton("🎮 墨水游戏", 0.05, Color3.fromRGB(120, 80, 160), function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/VapeVoidware/VW-Add/main/inkgame.lua", true))()
 end)
 
--- XK Hub按钮（已修复语法错误）
-local xkHubBtn = Instance.new("TextButton")
-xkHubBtn.Parent = Content
-xkHubBtn.Size = UDim2.new(0, 200, 0, 40)
-xkHubBtn.Position = UDim2.new(0.5, -100, 0.3, 0)
-xkHubBtn.BackgroundColor3 = Color3.fromRGB(255, 140, 0)
-xkHubBtn.Text = "XK Hub"
-xkHubBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-xkHubBtn.TextSize = 14
+-- 99夜按钮
+CreateButton("🌙 99夜", 0.2, Color3.fromRGB(60, 140, 80), function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/VapeVoidware/VW-Add/main/nightsintheforest.lua", true))()
+end)
 
-xkHubBtn.MouseButton1Click:Connect(function()
+-- XK Hub按钮
+CreateButton("🌟 XK Hub", 0.35, Color3.fromRGB(255, 140, 0), function()
     loadstring(game:HttpGet("https://github.com/devslopo/DVES/raw/main/XK%20Hub"))()
 end)
 
 -- 加载Pastebin脚本按钮
-local pastebinBtn = Instance.new("TextButton")
-pastebinBtn.Parent = Content
-pastebinBtn.Size = UDim2.new(0, 200, 0, 40)
-pastebinBtn.Position = UDim2.new(0.5, -100, 0.5, 0)
-pastebinBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-pastebinBtn.Text = "加载Pastebin脚本"
-pastebinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-pastebinBtn.TextSize = 14
-
-pastebinBtn.MouseButton1Click:Connect(function()
+CreateButton("📋 Pastebin脚本", 0.5, Color3.fromRGB(0, 120, 215), function()
     loadstring(game:HttpGet("https://pastebin.com/raw/Up3P2KBp", true))()
 end)
 
 -- 通用脚本按钮
-local universalBtn = Instance.new("TextButton")
-universalBtn.Parent = Content
-universalBtn.Size = UDim2.new(0, 200, 0, 40)
-universalBtn.Position = UDim2.new(0.5, -100, 0.7, 0)
-universalBtn.BackgroundColor3 = Color3.fromRGB(80, 160, 120)
-universalBtn.Text = "通用脚本"
-universalBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-universalBtn.TextSize = 14
-
-universalBtn.MouseButton1Click:Connect(function()
+CreateButton("🔧 通用脚本", 0.65, Color3.fromRGB(80, 160, 120), function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/qazwsx422/Jeu/main/%E9%80%9A%E7%94%A8", true))()
 end)
