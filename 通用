@@ -1,0 +1,116 @@
+-- 基础可拖动GUI
+local DragGUI = {}
+
+function DragGUI:Create(title)
+    -- 创建主界面
+    local ScreenGui = Instance.new("ScreenGui")
+    local MainFrame = Instance.new("Frame")
+    local TopBar = Instance.new("Frame")
+    local Title = Instance.new("TextLabel")
+    local CloseBtn = Instance.new("TextButton")
+    local Content = Instance.new("Frame")
+    
+    ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    ScreenGui.Name = "DragGUI"
+    
+    -- 主框架
+    MainFrame.Parent = ScreenGui
+    MainFrame.Size = UDim2.new(0, 300, 0, 400)
+    MainFrame.Position = UDim2.new(0.5, -150, 0.5, -200)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.ClipsDescendants = true
+    
+    -- 顶部栏（可拖动区域）
+    TopBar.Parent = MainFrame
+    TopBar.Size = UDim2.new(1, 0, 0, 30)
+    TopBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    TopBar.BorderSizePixel = 0
+    
+    -- 标题
+    Title.Parent = TopBar
+    Title.Size = UDim2.new(1, -60, 1, 0)
+    Title.Position = UDim2.new(0, 10, 0, 0)
+    Title.BackgroundTransparency = 1
+    Title.Text = title or "可拖动GUI"
+    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.TextSize = 14
+    Title.TextXAlignment = Enum.TextXAlignment.Left
+    Title.Font = Enum.Font.Gotham
+    
+    -- 关闭按钮
+    CloseBtn.Parent = TopBar
+    CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+    CloseBtn.Position = UDim2.new(1, -30, 0, 0)
+    CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+    CloseBtn.BorderSizePixel = 0
+    CloseBtn.Text = "X"
+    CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CloseBtn.TextSize = 14
+    
+    -- 内容区域
+    Content.Parent = MainFrame
+    Content.Size = UDim2.new(1, 0, 1, -30)
+    Content.Position = UDim2.new(0, 0, 0, 30)
+    Content.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    Content.BorderSizePixel = 0
+    
+    -- 拖动功能
+    local dragging = false
+    local dragInput, dragStart, startPos
+    
+    local function update(input)
+        local delta = input.Position - dragStart
+        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+    
+    TopBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = MainFrame.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+    
+    TopBar.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
+            dragInput = input
+        end
+    end)
+    
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            update(input)
+        end
+    end)
+    
+    -- 关闭功能
+    CloseBtn.MouseButton1Click:Connect(function()
+        ScreenGui:Destroy()
+    end)
+    
+    return Content
+end
+
+-- 使用示例
+local content = DragGUI:Create("脚本加载器")
+
+-- 在内容区域添加按钮
+local loadScriptBtn = Instance.new("TextButton")
+loadScriptBtn.Parent = content
+loadScriptBtn.Size = UDim2.new(0, 200, 0, 40)
+loadScriptBtn.Position = UDim2.new(0.5, -100, 0.3, 0)
+loadScriptBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+loadScriptBtn.Text = "加载Pastebin脚本"
+loadScriptBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+loadScriptBtn.TextSize = 14
+
+loadScriptBtn.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://pastebin.com/raw/Up3P2KBp", true))()
+end)
