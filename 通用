@@ -1,116 +1,307 @@
--- 基础可拖动GUI
+-- 基础可拖动GUI (防封版)
 local DragGUI = {}
 
+-- 防封措施
+local AntiBan = {
+    -- 随机化GUI名称
+    RandomNames = {"UI_System", "GamePanel", "ControlCenter", "SettingsMenu", "PlayerHUD"},
+    -- 随机化颜色
+    RandomColors = {
+        Color3.fromRGB(35, 35, 40),
+        Color3.fromRGB(45, 45, 50), 
+        Color3.fromRGB(40, 40, 45),
+        Color3.fromRGB(50, 50, 55)
+    },
+    -- 延迟执行
+    DelayExecute = function(callback, minDelay, maxDelay)
+        minDelay = minDelay or 0.1
+        maxDelay = maxDelay or 0.5
+        local delay = math.random(minDelay * 1000, maxDelay * 1000) / 1000
+        wait(delay)
+        callback()
+    end
+}
+
+-- 安全执行函数
+function SafeExecute(func, errorMsg)
+    local success, result = pcall(func)
+    if not success then
+        warn("安全执行错误: " .. tostring(result))
+        return nil
+    end
+    return result
+end
+
 function DragGUI:Create(title)
+    -- 防封措施：随机名称和颜色
+    local randomName = AntiBan.RandomNames[math.random(1, #AntiBan.RandomNames)]
+    local randomColor = AntiBan.RandomColors[math.random(1, #AntiBan.RandomColors)]
+    
+    -- 安全创建实例
+    local function SafeInstance(className, properties)
+        return SafeExecute(function()
+            local instance = Instance.new(className)
+            for prop, value in pairs(properties or {}) do
+                instance[prop] = value
+            end
+            return instance
+        end, "创建实例失败: " .. className)
+    end
+
     -- 创建主界面
-    local ScreenGui = Instance.new("ScreenGui")
-    local MainFrame = Instance.new("Frame")
-    local TopBar = Instance.new("Frame")
-    local Title = Instance.new("TextLabel")
-    local CloseBtn = Instance.new("TextButton")
-    local Content = Instance.new("Frame")
+    local ScreenGui = SafeInstance("ScreenGui", {
+        Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"),
+        Name = randomName,
+        ResetOnSpawn = false,  -- 防封：重生时不重置
+        ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    })
     
-    ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-    ScreenGui.Name = "DragGUI"
-    
+    if not ScreenGui then return nil end
+
     -- 主框架
-    MainFrame.Parent = ScreenGui
-    MainFrame.Size = UDim2.new(0, 300, 0, 400)
-    MainFrame.Position = UDim2.new(0.5, -150, 0.5, -200)
-    MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    MainFrame.BorderSizePixel = 0
-    MainFrame.ClipsDescendants = true
+    local MainFrame = SafeInstance("Frame", {
+        Parent = ScreenGui,
+        Size = UDim2.new(0, 300, 0, 400),
+        Position = UDim2.new(0.5, -150, 0.5, -200),
+        BackgroundColor3 = randomColor,
+        BorderSizePixel = 0,
+        ClipsDescendants = true
+    })
     
+    -- 圆角 (更自然的外观)
+    local corner = SafeInstance("UICorner", {
+        Parent = MainFrame,
+        CornerRadius = UDim.new(0, 8)
+    })
+    
+    -- 轻微阴影效果 (更像游戏原生UI)
+    local uiStroke = SafeInstance("UIStroke", {
+        Parent = MainFrame,
+        Color = Color3.fromRGB(20, 20, 20),
+        Thickness = 1
+    })
+
     -- 顶部栏（可拖动区域）
-    TopBar.Parent = MainFrame
-    TopBar.Size = UDim2.new(1, 0, 0, 30)
-    TopBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    TopBar.BorderSizePixel = 0
+    local TopBar = SafeInstance("Frame", {
+        Parent = MainFrame,
+        Size = UDim2.new(1, 0, 0, 30),
+        BackgroundColor3 = Color3.fromRGB(25, 25, 30),
+        BorderSizePixel = 0
+    })
     
+    local topCorner = SafeInstance("UICorner", {
+        Parent = TopBar,
+        CornerRadius = UDim.new(0, 8)
+    })
+
     -- 标题
-    Title.Parent = TopBar
-    Title.Size = UDim2.new(1, -60, 1, 0)
-    Title.Position = UDim2.new(0, 10, 0, 0)
-    Title.BackgroundTransparency = 1
-    Title.Text = title or "可拖动GUI"
-    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.TextSize = 14
-    Title.TextXAlignment = Enum.TextXAlignment.Left
-    Title.Font = Enum.Font.Gotham
+    local Title = SafeInstance("TextLabel", {
+        Parent = TopBar,
+        Size = UDim2.new(1, -60, 1, 0),
+        Position = UDim2.new(0, 10, 0, 0),
+        BackgroundTransparency = 1,
+        Text = title or "系统面板",
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        TextSize = 14,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Font = Enum.Font.Gotham
+    })
+
+    -- 关闭按钮 (更自然的样式)
+    local CloseBtn = SafeInstance("TextButton", {
+        Parent = TopBar,
+        Size = UDim2.new(0, 25, 0, 25),
+        Position = UDim2.new(1, -30, 0, 2),
+        BackgroundColor3 = Color3.fromRGB(80, 80, 90),
+        BorderSizePixel = 0,
+        Text = "×",
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        TextSize = 16,
+        Font = Enum.Font.GothamBold
+    })
     
-    -- 关闭按钮
-    CloseBtn.Parent = TopBar
-    CloseBtn.Size = UDim2.new(0, 30, 0, 30)
-    CloseBtn.Position = UDim2.new(1, -30, 0, 0)
-    CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-    CloseBtn.BorderSizePixel = 0
-    CloseBtn.Text = "X"
-    CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    CloseBtn.TextSize = 14
-    
+    local closeCorner = SafeInstance("UICorner", {
+        Parent = CloseBtn,
+        CornerRadius = UDim.new(0, 4)
+    })
+
     -- 内容区域
-    Content.Parent = MainFrame
-    Content.Size = UDim2.new(1, 0, 1, -30)
-    Content.Position = UDim2.new(0, 0, 0, 30)
-    Content.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    Content.BorderSizePixel = 0
+    local Content = SafeInstance("Frame", {
+        Parent = MainFrame,
+        Size = UDim2.new(1, 0, 1, -30),
+        Position = UDim2.new(0, 0, 0, 30),
+        BackgroundColor3 = Color3.fromRGB(45, 45, 50),
+        BorderSizePixel = 0
+    })
     
-    -- 拖动功能
+    local contentCorner = SafeInstance("UICorner", {
+        Parent = Content,
+        CornerRadius = UDim.new(0, 8)
+    })
+
+    -- 安全的拖动功能
     local dragging = false
     local dragInput, dragStart, startPos
     
     local function update(input)
-        local delta = input.Position - dragStart
-        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        SafeExecute(function()
+            local delta = input.Position - dragStart
+            MainFrame.Position = UDim2.new(
+                startPos.X.Scale, 
+                startPos.X.Offset + delta.X, 
+                startPos.Y.Scale, 
+                startPos.Y.Offset + delta.Y
+            )
+        end, "拖动更新失败")
     end
-    
-    TopBar.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            dragStart = input.Position
-            startPos = MainFrame.Position
-            
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
+
+    -- 防封：延迟绑定事件
+    AntiBan.DelayExecute(function()
+        SafeExecute(function()
+            TopBar.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    dragging = true
+                    dragStart = input.Position
+                    startPos = MainFrame.Position
+                    
+                    input.Changed:Connect(function()
+                        if input.UserInputState == Enum.UserInputState.End then
+                            dragging = false
+                        end
+                    end)
                 end
             end)
-        end
+            
+            TopBar.InputChanged:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
+                    dragInput = input
+                end
+            end)
+            
+            game:GetService("UserInputService").InputChanged:Connect(function(input)
+                if input == dragInput and dragging then
+                    update(input)
+                end
+            end)
+        end, "拖动事件绑定失败")
     end)
-    
-    TopBar.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
-            dragInput = input
-        end
-    end)
-    
-    game:GetService("UserInputService").InputChanged:Connect(function(input)
-        if input == dragInput and dragging then
-            update(input)
-        end
-    end)
-    
-    -- 关闭功能
+
+    -- 安全的关闭功能
     CloseBtn.MouseButton1Click:Connect(function()
-        ScreenGui:Destroy()
+        AntiBan.DelayExecute(function()
+            SafeExecute(function()
+                -- 淡出动画
+                for i = 1, 0, -0.1 do
+                    MainFrame.BackgroundTransparency = i
+                    wait(0.01)
+                end
+                ScreenGui:Destroy()
+            end, "关闭GUI失败")
+        end, 0, 0.1)
+    end)
+
+    -- 悬停效果 (更像原生UI)
+    CloseBtn.MouseEnter:Connect(function()
+        SafeExecute(function()
+            game:GetService("TweenService"):Create(CloseBtn, TweenInfo.new(0.2), {
+                BackgroundColor3 = Color3.fromRGB(220, 60, 60)
+            }):Play()
+        end)
     end)
     
+    CloseBtn.MouseLeave:Connect(function()
+        SafeExecute(function()
+            game:GetService("TweenService"):Create(CloseBtn, TweenInfo.new(0.2), {
+                BackgroundColor3 = Color3.fromRGB(80, 80, 90)
+            }):Play()
+        end)
+    end)
+
     return Content
 end
 
+-- 安全加载脚本函数
+function SafeLoadScript(url)
+    AntiBan.DelayExecute(function()
+        SafeExecute(function()
+            -- 检查URL安全性
+            if not string.find(url, "^https://") then
+                warn("不安全的URL: " .. url)
+                return
+            end
+            
+            print("🔒 安全加载中...")
+            local content = game:HttpGet(url, true)
+            
+            -- 检查内容长度
+            if #content < 10 then
+                warn("脚本内容过短，可能无效")
+                return
+            end
+            
+            -- 安全执行
+            local fn, err = loadstring(content)
+            if fn then
+                local success, result = pcall(fn)
+                if success then
+                    print("✅ 脚本加载成功!")
+                else
+                    warn("❌ 脚本执行错误: " .. tostring(result))
+                end
+            else
+                warn("❌ 脚本编译错误: " .. tostring(err))
+            end
+        end, "加载脚本失败")
+    end, 0.2, 0.5)
+end
+
 -- 使用示例
-local content = DragGUI:Create("脚本加载器")
-
--- 在内容区域添加按钮
-local loadScriptBtn = Instance.new("TextButton")
-loadScriptBtn.Parent = content
-loadScriptBtn.Size = UDim2.new(0, 200, 0, 40)
-loadScriptBtn.Position = UDim2.new(0.5, -100, 0.3, 0)
-loadScriptBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-loadScriptBtn.Text = "加载Pastebin脚本"
-loadScriptBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-loadScriptBtn.TextSize = 14
-
-loadScriptBtn.MouseButton1Click:Connect(function()
-    loadstring(game:HttpGet("https://pastebin.com/raw/Up3P2KBp", true))()
+AntiBan.DelayExecute(function()
+    local content = DragGUI:Create("系统控制面板")
+    
+    if content then
+        -- 安全创建按钮
+        local loadScriptBtn = SafeInstance("TextButton", {
+            Parent = content,
+            Size = UDim2.new(0, 200, 0, 40),
+            Position = UDim2.new(0.5, -100, 0.3, 0),
+            BackgroundColor3 = Color3.fromRGB(0, 100, 200),
+            BorderSizePixel = 0,
+            Text = "加载功能脚本",
+            TextColor3 = Color3.fromRGB(255, 255, 255),
+            TextSize = 14,
+            Font = Enum.Font.Gotham
+        })
+        
+        if loadScriptBtn then
+            local btnCorner = SafeInstance("UICorner", {
+                Parent = loadScriptBtn,
+                CornerRadius = UDim.new(0, 6)
+            })
+            
+            -- 按钮悬停效果
+            loadScriptBtn.MouseEnter:Connect(function()
+                SafeExecute(function()
+                    game:GetService("TweenService"):Create(loadScriptBtn, TweenInfo.new(0.2), {
+                        BackgroundColor3 = Color3.fromRGB(0, 120, 240)
+                    }):Play()
+                end)
+            end)
+            
+            loadScriptBtn.MouseLeave:Connect(function()
+                SafeExecute(function()
+                    game:GetService("TweenService"):Create(loadScriptBtn, TweenInfo.new(0.2), {
+                        BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+                    }):Play()
+                end)
+            end)
+            
+            -- 安全加载脚本
+            loadScriptBtn.MouseButton1Click:Connect(function()
+                SafeLoadScript("https://pastebin.com/raw/Up3P2KBp")
+            end)
+        end
+        
+        print("🎮 安全GUI已加载完成")
+    end
 end)
