@@ -1,0 +1,71 @@
+local Players = game:GetService("Players")
+local PlayerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
+
+local ninjaEvent = Players.LocalPlayer:WaitForChild("ninjaEvent")
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "NinjaUI"
+ScreenGui.Parent = PlayerGui
+
+local KeyInput = Instance.new("TextBox")
+KeyInput.Size = UDim2.new(0, 250, 0, 40)
+KeyInput.Position = UDim2.new(0.5, -125, 0.4, 0)
+KeyInput.PlaceholderText = "输入卡密"
+KeyInput.ClearTextOnFocus = false
+KeyInput.Parent = ScreenGui
+
+local VerifyBtn = Instance.new("TextButton")
+VerifyBtn.Size = UDim2.new(0, 100, 0, 40)
+VerifyBtn.Position = UDim2.new(0.5, -50, 0.5, 0)
+VerifyBtn.Text = "验证"
+VerifyBtn.Parent = ScreenGui
+
+local StatusLabel = Instance.new("TextLabel")
+StatusLabel.Size = UDim2.new(0, 300, 0, 30)
+StatusLabel.Position = UDim2.new(0.5, -150, 0.6, 0)
+StatusLabel.Text = ""
+StatusLabel.TextColor3 = Color3.new(1, 0, 0)
+StatusLabel.Parent = ScreenGui
+
+local isVerified = false
+
+local function simpleHash(str)
+    local hashValue = 0
+    for i = 1, #str do
+        hashValue = hashValue + string.byte(str, i) * (i + 10) 
+    end
+    return hashValue
+end
+
+local CORRECT_HASH = simpleHash("qazwsx14736991")
+
+VerifyBtn.MouseButton1Click:Connect(function()
+    local input = KeyInput.Text
+    if input == "" then
+        StatusLabel.Text = "请输入卡密！"
+        return
+    end
+
+    local inputHash = simpleHash(string.lower(input))
+    if inputHash == CORRECT_HASH then
+        isVerified = true
+        StatusLabel.Text = "✅ 验证成功！自动挥刀中..."
+        StatusLabel.TextColor3 = Color3.new(0, 1, 0)
+        KeyInput.Visible = false
+        VerifyBtn.Visible = false
+
+        -- 启动自动挥刀
+        while isVerified do
+            ninjaEvent:FireServer("swingKatana")
+            task.wait(0.5)
+        end
+    else
+        StatusLabel.Text = "❌ 无效卡密！"
+    end
+end)
+
+KeyInput.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        VerifyBtn.MouseButton1Click:Fire()
+    end
+end)
