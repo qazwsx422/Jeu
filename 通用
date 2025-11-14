@@ -101,7 +101,7 @@ inkGameBtn.MouseButton1Click:Connect(function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/VapeVoidware/VW-Add/main/inkgame.lua", true))()
 end)
 
--- XK Hub按钮
+-- XK Hub按钮（已修复语法错误）
 local xkHubBtn = Instance.new("TextButton")
 xkHubBtn.Parent = Content
 xkHubBtn.Size = UDim2.new(0, 200, 0, 40)
@@ -112,7 +112,7 @@ xkHubBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 xkHubBtn.TextSize = 14
 
 xkHubBtn.MouseButton1Click:Connect(function()
-    loadstring(game:HttpGet(('https://github.com/devslopo/DVES/raw/main/XK%20Hub')))()
+    loadstring(game:HttpGet("https://github.com/devslopo/DVES/raw/main/XK%20Hub"))()
 end)
 
 -- 加载Pastebin脚本按钮
