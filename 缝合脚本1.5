@@ -4,7 +4,7 @@ local function createButtonEffect(button)
     local originalColor = button.BackgroundColor3
     
     button.MouseEnter:Connect(function()
-        -- 修复：分别处理RGB分量
+        -- Fix: Process RGB components separately
         local r, g, b = originalColor.R, originalColor.G, originalColor.B
         local newColor = Color3.fromRGB(
             math.min(r * 255 + 20, 255),
@@ -51,7 +51,7 @@ local function CreateButton(text, color, callback)
     createButtonEffect(button)
     
     button.MouseButton1Click:Connect(function()
-        -- 修复点击效果
+        -- Fix click effect
         local r, g, b = color.R, color.G, color.B
         local darkerColor = Color3.fromRGB(
             math.max(r * 255 - 30, 0),
