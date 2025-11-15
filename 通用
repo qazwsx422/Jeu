@@ -26,7 +26,7 @@ Title.Parent = TopBar
 Title.Size = UDim2.new(1, -60, 1, 0)
 Title.Position = UDim2.new(0, 10, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "脚本加载器"
+Title.Text = "Script Loader"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 14
 Title.TextXAlignment = Enum.TextXAlignment.Left
@@ -103,12 +103,12 @@ local function CreateButton(text, yPosition, color, callback)
 end
 
 -- 墨水游戏按钮
-CreateButton("🎮 墨水游戏", 0.05, Color3.fromRGB(120, 80, 160), function()
+CreateButton("🎮 Ink Game", 0.05, Color3.fromRGB(120, 80, 160), function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/VapeVoidware/VW-Add/main/inkgame.lua", true))()
 end)
 
 -- 99夜按钮
-CreateButton("🌙 99夜", 0.2, Color3.fromRGB(60, 140, 80), function()
+CreateButton("🌙 99 Nights", 0.2, Color3.fromRGB(60, 140, 80), function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/VapeVoidware/VW-Add/main/nightsintheforest.lua", true))()
 end)
 
@@ -118,11 +118,11 @@ CreateButton("🌟 XK Hub", 0.35, Color3.fromRGB(255, 140, 0), function()
 end)
 
 -- 加载Pastebin脚本按钮
-CreateButton("📋 Pastebin脚本", 0.5, Color3.fromRGB(0, 120, 215), function()
+CreateButton("📋 Pastebin Script", 0.5, Color3.fromRGB(0, 120, 215), function()
     loadstring(game:HttpGet("https://pastebin.com/raw/Up3P2KBp", true))()
 end)
 
 -- 通用脚本按钮
-CreateButton("🔧 通用脚本", 0.65, Color3.fromRGB(80, 160, 120), function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/qazwsx422/Jeu/main/%E9%80%9A%E7%94%A8", true))()
+CreateButton("🔧 Universal Script", 0.65, Color3.fromRGB(80, 160, 120), function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/qazwsx422/Jeu/5586037cd62f08bf050fb237c533b110ff4850e0/%E9%80%9A%E7%94%A8", true))()
 end)
