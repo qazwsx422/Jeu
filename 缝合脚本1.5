@@ -1,60 +1,100 @@
--- Basic Draggable GUI
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
 local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "ScriptLoaderGUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
 local MainFrame = Instance.new("Frame")
 local TopBar = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
 local CloseBtn = Instance.new("TextButton")
-local Content = Instance.new("Frame")
+local Content = Instance.new("ScrollingFrame")
 
-ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.Parent = playerGui
 
--- Main Frame
 MainFrame.Parent = ScreenGui
-MainFrame.Size = UDim2.new(0, 300, 0, 300)
-MainFrame.Position = UDim2.new(0.5, -150, 0.5, -150)
+MainFrame.Size = UDim2.new(0, 320, 0, 400)
+MainFrame.Position = UDim2.new(0.5, -160, 0.5, -200)
 MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 MainFrame.BorderSizePixel = 0
+MainFrame.ClipsDescendants = true
 
--- Top Bar (Draggable Area)
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.Parent = MainFrame
+
 TopBar.Parent = MainFrame
-TopBar.Size = UDim2.new(1, 0, 0, 30)
+TopBar.Size = UDim2.new(1, 0, 0, 35)
 TopBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 TopBar.BorderSizePixel = 0
+TopBar.ZIndex = 2
 
--- Title
+local TopBarCorner = Instance.new("UICorner")
+TopBarCorner.CornerRadius = UDim.new(0, 8)
+TopBarCorner.Parent = TopBar
+
 Title.Parent = TopBar
 Title.Size = UDim2.new(1, -60, 1, 0)
 Title.Position = UDim2.new(0, 10, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "Script Loader"
+Title.Text = "🎮 Script Loader"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 14
+Title.TextSize = 16
 Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Font = Enum.Font.GothamSemibold
+Title.ZIndex = 2
 
--- Close Button
 CloseBtn.Parent = TopBar
 CloseBtn.Size = UDim2.new(0, 30, 0, 30)
-CloseBtn.Position = UDim2.new(1, -30, 0, 0)
+CloseBtn.Position = UDim2.new(1, -35, 0, 2)
 CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
 CloseBtn.BorderSizePixel = 0
 CloseBtn.Text = "X"
 CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 CloseBtn.TextSize = 14
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.ZIndex = 2
 
--- Content Area
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 6)
+CloseCorner.Parent = CloseBtn
+
 Content.Parent = MainFrame
-Content.Size = UDim2.new(1, 0, 1, -30)
-Content.Position = UDim2.new(0, 0, 0, 30)
+Content.Size = UDim2.new(1, -10, 1, -45)
+Content.Position = UDim2.new(0, 5, 0, 40)
 Content.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+Content.BackgroundTransparency = 1
 Content.BorderSizePixel = 0
+Content.ScrollBarThickness = 6
+Content.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 100)
+Content.CanvasSize = UDim2.new(0, 0, 0, 0)
 
--- Drag Function
+local ContentCorner = Instance.new("UICorner")
+ContentCorner.CornerRadius = UDim.new(0, 6)
+ContentCorner.Parent = Content
+
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.Parent = Content
+UIListLayout.Padding = UDim.new(0, 10)
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
 local dragging = false
 local dragInput, dragStart, startPos
 
 local function update(input)
     local delta = input.Position - dragStart
-    MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    MainFrame.Position = UDim2.new(
+        startPos.X.Scale, 
+        startPos.X.Offset + delta.X, 
+        startPos.Y.Scale, 
+        startPos.Y.Offset + delta.Y
+    )
 end
 
 TopBar.InputBegan:Connect(function(input)
@@ -62,70 +102,161 @@ TopBar.InputBegan:Connect(function(input)
         dragging = true
         dragStart = input.Position
         startPos = MainFrame.Position
-        input.Changed:Connect(function()
+        
+        local connection
+        connection = input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
                 dragging = false
+                connection:Disconnect()
             end
         end)
     end
 end)
 
 TopBar.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
         dragInput = input
     end
 end)
 
-game:GetService("UserInputService").InputChanged:Connect(function(input)
+UserInputService.InputChanged:Connect(function(input)
     if input == dragInput and dragging then
         update(input)
     end
 end)
 
--- Close Function
 CloseBtn.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
+    local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local tween = TweenService:Create(MainFrame, tweenInfo, {
+        Size = UDim2.new(0, 0, 0, 0),
+        Position = UDim2.new(0.5, 0, 0.5, 0)
+    })
+    tween:Play()
+    tween.Completed:Connect(function()
+        ScreenGui:Destroy()
+    end)
 end)
 
--- Helper function to create buttons
-local function CreateButton(text, yPosition, color, callback)
+local function createButtonEffect(button)
+    local originalSize = button.Size
+    local originalColor = button.BackgroundColor3
+    
+    button.MouseEnter:Connect(function()
+        local tween = TweenService:Create(button, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(
+                math.min(originalColor.R * 255 + 20, 255),
+                math.min(originalColor.G * 255 + 20, 255),
+                math.min(originalColor.B * 255 + 20, 255)
+            ) / 255,
+            Size = UDim2.new(0.9, 0, 0, 40)
+        })
+        tween:Play()
+    end)
+    
+    button.MouseLeave:Connect(function()
+        local tween = TweenService:Create(button, TweenInfo.new(0.2), {
+            BackgroundColor3 = originalColor,
+            Size = originalSize
+        })
+        tween:Play()
+    end)
+end
+
+local function CreateButton(text, color, callback)
     local button = Instance.new("TextButton")
     button.Parent = Content
-    button.Size = UDim2.new(0, 200, 0, 35)
-    button.Position = UDim2.new(0.5, -100, yPosition, 0)
+    button.Size = UDim2.new(0.85, 0, 0, 35)
+    button.Position = UDim2.new(0.075, 0, 0, 0)
     button.BackgroundColor3 = color
     button.BorderSizePixel = 0
     button.Text = text
     button.TextColor3 = Color3.fromRGB(255, 255, 255)
     button.TextSize = 14
-    button.MouseButton1Click:Connect(callback)
+    button.Font = Enum.Font.Gotham
+    button.AutoButtonColor = false
+    button.LayoutOrder = #Content:GetChildren()
+    
+    local buttonCorner = Instance.new("UICorner")
+    buttonCorner.CornerRadius = UDim.new(0, 6)
+    buttonCorner.Parent = button
+    
+            createButtonEffect(button)
+    
+    button.MouseButton1Click:Connect(function()
+        local clickTween = TweenService:Create(button, TweenInfo.new(0.1), {
+            BackgroundColor3 = Color3.fromRGB(
+                math.min(color.R * 255 - 30, 255),
+                math.min(color.G * 255 - 30, 255),
+                math.min(color.B * 255 - 30, 255)
+            ) / 255
+        })
+        clickTween:Play()
+        clickTween.Completed:Wait()
+        
+        pcall(callback)
+        
+        -local restoreTween = TweenService:Create(button, TweenInfo.new(0.1), {
+            BackgroundColor3 = color
+        })
+        restoreTween:Play()
+    end)
+    
     return button
 end
 
--- Ink Game Button
-CreateButton("🎮 Ink Game", 0.05, Color3.fromRGB(120, 80, 160), function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/VapeVoidware/VW-Add/main/inkgame.lua", true))()
+UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    Content.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 10)
 end)
 
--- 99 Nights Button
-CreateButton("🌙 99 Nights", 0.2, Color3.fromRGB(60, 140, 80), function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/VapeVoidware/VW-Add/main/nightsintheforest.lua", true))()
-end)
+local scripts = {
+    {
+        name = "🎮 Ink Game",
+        color = Color3.fromRGB(120, 80, 160),
+        callback = function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/VapeVoidware/VW-Add/main/inkgame.lua", true))()
+        end
+    },
+    {
+        name = "🌙 99 Nights",
+        color = Color3.fromRGB(60, 140, 80),
+        callback = function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/VapeVoidware/VW-Add/main/nightsintheforest.lua", true))()
+        end
+    },
+    {
+        name = "🌟 XK Hub",
+        color = Color3.fromRGB(255, 140, 0),
+        callback = function()
+            loadstring(game:HttpGet("https://github.com/devslopo/DVES/raw/main/XK%20Hub"))()
+        end
+    },
+    {
+        name = "📋 Pastebin Script",
+        color = Color3.fromRGB(0, 120, 215),
+        callback = function()
+            loadstring(game:HttpGet("https://pastebin.com/raw/Up3P2KBp", true))()
+        end
+    },
+    {
+        name = "🔧 Universal Script",
+        color = Color3.fromRGB(80, 160, 120),
+        callback = function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/qazwsx422/Jeu/5586037cd62f08bf050fb237c533b110ff4850e0/%E9%80%9A%E7%94%A8", true))()
+        end
+    }
+}
 
--- XK Hub Button
-CreateButton("🌟 XK Hub", 0.35, Color3.fromRGB(255, 140, 0), function()
-    loadstring(game:HttpGet("https://github.com/devslopo/DVES/raw/main/XK%20Hub"))()
-end)
+for _, scriptInfo in ipairs(scripts) do
+    CreateButton(scriptInfo.name, scriptInfo.color, scriptInfo.callback)
+end
 
--- Pastebin Script Button
-CreateButton("📋 Pastebin Script", 0.5, Color3.fromRGB(0, 120, 215), function()
-    loadstring(game:HttpGet("https://pastebin.com/raw/Up3P2KBp", true))()
-end)
-
--- Universal Script Button
-CreateButton("🔧 Universal Script", 0.65, Color3.fromRGB(80, 160, 120), function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/qazwsx422/Jeu/5586037cd62f08bf050fb237c533b110ff4850e0/%E9%80%9A%E7%94%A8", true))()
-end)
+MainFrame.Size = UDim2.new(0, 0, 0, 0)
+local openTween = TweenService:Create(MainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+    Size = UDim2.new(0, 320, 0, 400),
+    Position = UDim2.new(0.5, -160, 0.5, -200)
+})
+openTween:Play()
 
 print("🎮 Script Loader has been loaded successfully!")
 print("💡 All scripts are ready to use")
+print("📍 GUI created in PlayerGui")
